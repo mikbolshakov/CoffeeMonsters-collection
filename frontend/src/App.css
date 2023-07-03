@@ -1,0 +1,252 @@
+@font-face {
+  font-family: "Cookies";
+  src: url("../src/fonts/Cookies.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Schoolbell";
+  src: url("../src/fonts/Schoolbell-Regular.ttf") format("truetype");
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: rgba(105, 171, 167, 1);
+}
+
+.scroll-top-button {
+  position: fixed;
+  bottom: 5%;
+  right: 5%;
+  height: 40px;
+  background-color: #3333332e;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: opacity 0.5s ease;
+  transition: background-color 0.7s ease;
+}
+
+.scroll-top-button:hover {
+  background-color: #3333337c;
+}
+
+/* PARAGRAPHS */
+/* home */
+.home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.home-paragraph {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.home-paragraph img {
+  display: block;
+}
+
+.home-logo {
+  margin: 60px;
+}
+
+.home-mint {
+  margin: 60px;
+}
+
+/* about */
+.about-paragraph {
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  display: flex;
+  margin-bottom: 50px;
+  background-color: white;
+  min-height: 370px;
+}
+
+.about-text {
+  width: 50%;
+}
+.about-text h1 {
+  text-align: center;
+  font-family: Cookies;
+  color: rgba(105, 171, 167, 1);
+}
+.about-text p {
+  font-size: 25px;
+  line-height: 1.9;
+  font-family: Schoolbell;
+}
+
+/* mint */
+.mint-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.mint-container h1 {
+  font-family: Cookies;
+  color: white;
+}
+.options-container {
+  display: flex;
+  color: white;
+  font-family: Schoolbell;
+  font-size: 24px;
+  position: relative;
+  margin: 10px;
+}
+
+.option {
+  margin: 0 30px;
+  cursor: pointer;
+}
+
+.option.selected {
+  position: relative;
+}
+
+.underline.free {
+  right: 26px;
+}
+
+.underline.public {
+  left: 28px;
+}
+
+.underline {
+  position: absolute;
+  bottom: -3px;
+  width: 100px;
+  height: 3px;
+  background-color: #fff;
+}
+
+.option:not(:last-child) {
+  margin: 0 30px;
+}
+
+.monster-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 30px;
+  margin: 30px 30px 30px 10px;
+}
+
+.details-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-family: Schoolbell;
+  font-size: 24px;
+}
+
+.details-left {
+  margin-right: 20px;
+}
+
+.details-right {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-column {
+  width: 270px;
+  height: 50px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.detail-label {
+  text-align: left;
+}
+
+.detail-value {
+  text-align: right;
+}
+
+.number-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.number-buttons span {
+  margin: 0 15px;
+}
+
+.number-buttons button {
+  display: inline-block;
+  border: 2px solid white;
+  border-radius: 50%;
+  background-color: rgba(105, 171, 167, 1);
+  color: white;
+  height: 35px;
+  width: 35px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.number-buttons button:hover {
+  background-color: rgb(48, 106, 102);
+}
+.mint-now-button {
+  margin: 20px;
+  margin-bottom: 60px;
+  width: 220px;
+  padding: 17px;
+  border-radius: 50px;
+  background-color: white;
+  color: rgba(105, 171, 167, 1);
+  font-family: Cookies;
+  border: none;
+  cursor: pointer;
+  font-size: 26px;
+}
+
+/* social */
+.social {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  min-height: 180px;
+}
+
+.social-paragraph {
+  display: flex;
+  align-items: center;
+}
+
+.social-paragraph div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.social-paragraph img {
+  display: block;
+  height: 60px;
+  margin: 30px 30px 0 30px;
+  cursor: pointer;
+}
+.social-paragraph p {
+  color: rgba(105, 166, 171, 1);
+  font-size: 20px;
+  cursor: pointer;
+  font-family: Schoolbell;
+}
