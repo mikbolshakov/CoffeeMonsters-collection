@@ -16,7 +16,9 @@ const MintComponent = () => {
   };
 
   const handleIncreaseNftCount = () => {
-    setNftCount(nftCount + 1);
+    if (nftCount < 10) {
+      setNftCount(nftCount + 1);
+    }
   };
 
   const handleMint = () => {
