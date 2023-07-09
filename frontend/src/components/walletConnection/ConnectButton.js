@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 import { injected } from "./Connectors";
 import { connectWallet, disconnectWallet } from "./StorageWallet.js";
 
-const ConnectButton = ({ onClick }) => {
+const ConnectButton = () => {
   const { activate, account, deactivate } = useWeb3React();
 
   const connectMetamaskHandler = async () => {
@@ -36,18 +36,17 @@ const ConnectButton = ({ onClick }) => {
         }
         await activate(injected);
         connectWallet();
-        // onClick();
       } else {
-        alert("Расширение кошелька не найдено");
+        alert("Wallet extension not found");
       }
     } catch (e) {
       console.log(e.message);
-      alert("Ошибка");
+      alert("Wallet connection error");
     }
   };
 
   const shortAddress = (address) => {
-    return address.substr(0, 5) + "..." + address.substr(-6);
+    return address.substr(0, 6) + "..." + address.substr(-5);
   };
 
   const disconnectWalletHandler = () => {
