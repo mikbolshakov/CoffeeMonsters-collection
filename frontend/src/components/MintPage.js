@@ -1,16 +1,25 @@
 import React, { useState } from "react";
 import monsterImage from "../images/Box.svg";
-import arrow from "../images/arrow.png";
+import arrow from "../images/CheckBox.svg";
+import arrow2 from "../images/checkmark.svg";
 
 const MintComponent = () => {
-  const [selectedOption, setSelectedOption] = useState("free");
+  const [selectedOption, setSelectedOption] = useState("public");
   const [nftCount, setNftCount] = useState(0);
-  const [merchImage, setMerchImage] = useState("img11");
   const [emailVisible, setEmailVisible] = useState(false);
+  const [upgradedPrice, setUpgradedPrice] = useState(false);
+  const [currentArrow, setCurrentArrow] = useState(arrow);
 
   const handleMerchImageChange = () => {
-    setMerchImage("img22");
-    setEmailVisible(true);
+    if (currentArrow === arrow) {
+      setEmailVisible(true);
+      setUpgradedPrice(true);
+      setCurrentArrow(arrow2);
+    } else {
+      setEmailVisible(false);
+      setUpgradedPrice(false);
+      setCurrentArrow(arrow);
+    }
   };
 
   const handleOptionChange = (option) => {
@@ -31,8 +40,9 @@ const MintComponent = () => {
 
   const handleMint = () => {
     setNftCount(0);
-    setMerchImage("img11");
     setEmailVisible(false);
+    setUpgradedPrice(false);
+    setCurrentArrow(arrow);
   };
 
   return (
@@ -50,12 +60,26 @@ const MintComponent = () => {
           onClick={() => handleOptionChange("half")}
         >
           50% Mint
+          <div className="info-button">
+            ?
+            <span className="info-text">
+              Users with NFTs from the following collections (Proof of Narnian,
+              LobsterDao, DegenScore, Harma) enjoy a 50% minting price.
+            </span>
+          </div>
         </div>
         <div
           className={`option ${selectedOption === "free" ? "selected" : ""}`}
           onClick={() => handleOptionChange("free")}
         >
           Free Mint
+          <div className="info-button">
+            ?
+            <span className="info-text1">
+              The CoffeeMonsters pass holder has the exclusive privilege of free
+              minting opportunity.
+            </span>
+          </div>
         </div>
         <div className={`underline ${selectedOption}`} />
       </div>
@@ -74,6 +98,8 @@ const MintComponent = () => {
                   ? "Free"
                   : selectedOption === "half"
                   ? "0.00333 ETH"
+                  : upgradedPrice
+                  ? "0.0666 ETH"
                   : "0.00666 ETH"}
               </div>
             </div>
@@ -99,28 +125,36 @@ const MintComponent = () => {
 
           {selectedOption === "public" && (
             <div className="detail-column">
-
               <div className="detail-row">
-                
-                <div className="detail-label">Merch</div>
-
-                <div className="merch-buttons">
-                  <img
-                    src={arrow}
-                    alt="Merch"
-                    onClick={handleMerchImageChange}
-                  />
-                  {emailVisible && (
-                    <input type="email" placeholder="leave us your email" />
-                  )}
+                <div className="detail-label">
+                  Merch
+                  <div className="info-button">
+                    ?
+                    <span className="info-text2">
+                      When minting NFTs with merchandise, please provide your
+                      valid mailing address. We'll reach out to confirm your
+                      size and delivery date, ensuring a seamless experience.
+                    </span>
+                  </div>
                 </div>
 
+                <div className="merch-buttons">
+                  <div className="merch-container">
+                    {emailVisible && (
+                      <input type="email" placeholder="leave us your email" />
+                    )}
+                    <img
+                      src={currentArrow}
+                      alt="Merch"
+                      onClick={handleMerchImageChange}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="merch-description">
                 Add the official Coffee Monsters merch
               </div>
-
             </div>
           )}
         </div>

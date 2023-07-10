@@ -1,43 +1,91 @@
-import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
-
-
-
 import { ethers } from "hardhat";
-import { impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { CoffeeMonsters } from "../typechain-types";
-import { Contract } from "ethers";
-
-
+import { CofMon } from "../typechain-types";
 
 describe("CoffeeMonsters tests", () => {
-  let token: NToken;
-  let deployer: string;
-  let user: string;
-  let tokenAsUser: NToken;
-  let CoffeeMonsters: CoffeeMonsters;
-
-  it("Deploys, grant role and transfer tokens to contract", async () => {
-    const Factory = await ethers.getContractFactory("CoffeeMonsters");
-    const coffeeMonsters = await Factory.deploy();
+  let signers: SignerWithAddress[];
+  let deployer: SignerWithAddress;
+  let user1: SignerWithAddress;
+  let user2: SignerWithAddress;
+  let user3: SignerWithAddress;
+  let user4: SignerWithAddress;
+  let firstContract: CofMon;
+  let secondContract: CofMon;
+  const publicPrice = ethers.utils.parseEther("0.00666");
+  const priceForBros = ethers.utils.parseEther("0.00333");
+  before(async () => {
+    signers = await ethers.getSigners();
+    deployer = signers[0];
+    user1 = signers[1];
+    user2 = signers[2];
+    user3 = signers[3];
+    user4 = signers[4];
+  });
+  it("Deploys first NFT contract", async () => {
+    const Factory = await ethers.getContractFactory("CofMon");
+    const coffeeMonsters = await Factory.deploy(
+      "https://gateway.pinata.cloud/ipfs/QmSpL6rVyrjZuFYKRiocL73d93eFa8DDaduuwmPKRoybRW/",
+      "0x9D9AE1ad49bE9b085Fef04B9c835D484a6D099e3"
+    );
     expect(coffeeMonsters.address).to.not.eq(ethers.constants.AddressZero);
-    CoffeeMonsters = coffeeMonsters as CoffeeMonsters;
+    firstContract = coffeeMonsters as CofMon;
+
+    await firstContract.unpause();
   });
 
-  it("works", async function() {
-    const tokenId = "tokenlink1";
-    const mintTx = await token.safeMint(user, tokenId);
+  it("Mint some nfts from first contract", async () => {
+    const mintTx = await firstContract.publicMint(user1.address, 1, {
+      value: publicPrice,
+    });
     await mintTx.wait();
-    expect(await token.tokenURI(0)).to.eq(`ipfs://${tokenId}`);
 
-    const tokenId2 = "tokenlink2";
-    const mintTx2 = await token.safeMint(user, tokenId2);
+    const mintTx2 = await firstContract.publicMint(user2.address, 1, {
+      value: publicPrice,
+    });
+    await mintTx2.wait();
+  });
+
+  it("Deploys second NFT contract", async () => {
+    const Factory = await ethers.getContractFactory("CofMon");
+    const outAddress = firstContract.address;
+    const coffeeMonsters = await Factory.deploy(
+      "https://gateway.pinata.cloud/ipfs/QmSpL6rVyrjZuFYKRiocL73d93eFa8DDaduuwmPKRoybRW/",
+      outAddress
+    );
+    expect(coffeeMonsters.address).to.not.eq(ethers.constants.AddressZero);
+    secondContract = coffeeMonsters as CofMon;
+
+    await secondContract.unpause();
+  });
+
+  it("Mint some nfts from second contract", async () => {
+    const mintTx = await secondContract.publicMint(user3.address, 1, {
+      value: publicPrice,
+    });
+    await mintTx.wait();
+    // expect(await token.tokenURI(0)).to.eq(`ipfs://${tokenId}`);
+
+    const mintTx2 = await secondContract.mintForBros(user1.address, 1, {
+      value: priceForBros,
+    });
     await mintTx2.wait();
 
-    const tokenId3 = "tokenlink3";
-    const mintTx3 = await token.safeMint(deployer, tokenId3);
+    await expect(
+      secondContract.mintForBros(user4.address, 1, {
+        value: priceForBros,
+      })
+    ).to.be.revertedWith("only for bros holders");
+  });
+});
+
+/*
+describe("Lock", function () {
+  // We define a fixture to reuse the same setup in every test.
+  // We use loadFixture to run this setup once, snapshot that state,
+  // and reset Hardhat Network to that snapshot in every test.
+  async function deployOneYearLockFixture() {
+    onst mintTx3 = await token.safeMint(deployer, tokenId3);
     await mintTx3.wait();
     expect(await token.totalSupply()).to.eq(3);
     const deployerTokenId = await token.tokenOfOwnerByIndex(deployer, 0);
@@ -57,21 +105,8 @@ describe("CoffeeMonsters tests", () => {
     const burnTx = await tokenAsUser.burn(deployerTokenId);
     await burnTx.wait();
     expect(await token.totalSupply()).to.eq(2);
-  });
-})
 
 
-
-
-
-
-
-
-describe("Lock", function () {
-  // We define a fixture to reuse the same setup in every test.
-  // We use loadFixture to run this setup once, snapshot that state,
-  // and reset Hardhat Network to that snapshot in every test.
-  async function deployOneYearLockFixture() {
     const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
     const ONE_GWEI = 1_000_000_000;
 
@@ -186,3 +221,4 @@ describe("Lock", function () {
     });
   });
 });
+*/
