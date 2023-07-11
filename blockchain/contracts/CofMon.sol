@@ -7,24 +7,31 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
-// нужно что-то придумать с роялти?
-contract CofMon is ERC721, Pausable, Ownable {
+contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
     using Counters for Counters.Counter;
-
     Counters.Counter private _tokenIdCounter;
 
-    IERC721 public otherNFTContract;
+    IERC721 public immutable firstPartnerNFTContract;
+    IERC721 public immutable secondPartnerNFTContract;
+    IERC721 public immutable thirdPartnerNFTContract;
+    IERC721 public immutable passContract;
+    address public immutable creatorAddress;
+    address public immutable developerAddress;
 
-    uint256 public constant MAX_ELEMENTS = 666;
+    uint256 public constant MAX_TOKENS = 666;
     uint256 public constant PRICE_PUBLIC = 0.00666 ether;
-    uint256 public constant PRICE_FOR_BROS = 0.00333 ether;
+    uint256 public constant PRICE_FOR_PARTNERS = 0.00333 ether;
     uint256 public constant PRICE_WITH_MERCH = 0.0666 ether;
     uint256 public constant MAX_PER_WALLET = 10;
-    address public constant creatorAddress = 0x2c84C3D16AaAC1157919D9210CBC7b8797F5A91a;
-    address public constant devAddress = 0x2c84C3D16AaAC1157919D9210CBC7b8797F5A91a;
     string public baseTokenURI;
 
-mapping(address => uint256) public mintPerWallet;
+    mapping(address => uint256) public mintPerWallet;
+    mapping(address => bool) public checkNumberOfPartnerTokens;
+    mapping(address => uint) public numberOfPartnerTokens;
+
+    mapping(address => bool) public checkNumberOfPassTokens;
+    mapping(address => uint) public numberOfPassTokens;
+
     // enum SaleState {
     //     CLOSED,
     //     OPEN,
@@ -32,10 +39,25 @@ mapping(address => uint256) public mintPerWallet;
     // }
     //  SaleState public saleState = SaleState.CLOSED;
 
-    constructor(string memory _baseURI, address _nftContract, address _receiver, uint _feeNumerator) ERC721("CofMon", "CMT") {
+    constructor(
+        string memory _baseURI,
+        address _firstPartnerNFTContract,
+        address _secondPartnerNFTContract,
+        address _thirdPartnerNFTContract,
+        address _pass,
+        address _receiver,
+        uint96 _feeNumerator,
+        address _creator,
+        address _developer
+    ) ERC721("CofMon", "CMT") {
         setBaseURI(_baseURI);
-        otherNFTContract = IERC721(_nftContract);
+        firstPartnerNFTContract = IERC721(_firstPartnerNFTContract);
+        secondPartnerNFTContract = IERC721(_secondPartnerNFTContract);
+        thirdPartnerNFTContract = IERC721(_thirdPartnerNFTContract);
+        passContract = IERC721(_pass);
         _setDefaultRoyalty(_receiver, _feeNumerator);
+        creatorAddress = _creator;
+        developerAddress = _developer;
         pause();
     }
 
@@ -51,17 +73,27 @@ mapping(address => uint256) public mintPerWallet;
         baseTokenURI = baseURI;
     }
 
-
-/*
-для этих 50% скидка на минт, бесплатно для держателей наших пассов и паблик. 
-еще четвёртый, паблик+мерч, он будет в 10 раз дороже паблика.
-*/
-    function publicMint(uint256 _count) public payable whenNotPaused() {
+    function publicMint(
+        uint256 _count,
+        uint _mintIndex
+    ) public payable whenNotPaused {
         uint256 total = _totalSupply();
-        require(total <= MAX_ELEMENTS, "Sale end");
-        require(total + _count <= MAX_ELEMENTS, "Max limit");
-        require(mintPerWallet[msg.sender] + _count <= MAX_PER_WALLET, "Exceeds number");
-        require(msg.value >= (PRICE_PUBLIC * _count), "Value below price");
+        require(_mintIndex <= 1, "Incorrect mint index");
+        require(total <= MAX_TOKENS, "Sale ended");
+        require(total + _count <= MAX_TOKENS, "Max limit");
+        require(
+            mintPerWallet[msg.sender] + _count <= MAX_PER_WALLET,
+            "Exceeds max per wallet number"
+        );
+
+        if (_mintIndex == 0) {
+            require(
+                msg.value >= (PRICE_WITH_MERCH * _count),
+                "Value below price"
+            );
+        } else if (_mintIndex == 1) {
+            require(msg.value >= (PRICE_PUBLIC * _count), "Value below price");
+        }
 
         for (uint256 i = 0; i < _count; i++) {
             _mintAnElement(msg.sender);
@@ -69,45 +101,78 @@ mapping(address => uint256) public mintPerWallet;
         mintPerWallet[msg.sender] += _count;
     }
 
-    function mintForBros(uint256 _count) public payable whenNotPaused() {
+    function mintForPartners(uint256 _count) public payable whenNotPaused {
         uint256 total = _totalSupply();
-        require(total <= MAX_ELEMENTS, "Sale end");
-        require(total + _count <= MAX_ELEMENTS, "Max limit");
-        require(mintPerWallet[msg.sender] + _count <= MAX_PER_WALLET, "Exceeds number");
-        require(msg.value >= (PRICE_FOR_BROS * _count), "Value below price");
-        require(otherNFTContract.balanceOf(msg.sender) >= _count, "only for bros holders");
+        require(total <= MAX_TOKENS, "Sale ended");
+        require(total + _count <= MAX_TOKENS, "Max limit");
+        require(
+            mintPerWallet[msg.sender] + _count <= MAX_PER_WALLET,
+            "Exceeds max per wallet number"
+        );
+        require(
+            msg.value >= (PRICE_FOR_PARTNERS * _count),
+            "Value below price"
+        );
+        require(
+            numberOfPartnerTokens[msg.sender] > 0 ||
+                firstPartnerNFTContract.balanceOf(msg.sender) > 0 ||
+                secondPartnerNFTContract.balanceOf(msg.sender) > 0 ||
+                thirdPartnerNFTContract.balanceOf(msg.sender) > 0,
+            "Only for partner NFT holders"
+        );
+
+        if (!checkNumberOfPartnerTokens[msg.sender]) {
+            uint count = firstPartnerNFTContract.balanceOf(msg.sender) +
+                secondPartnerNFTContract.balanceOf(msg.sender) +
+                thirdPartnerNFTContract.balanceOf(msg.sender);
+
+            numberOfPartnerTokens[msg.sender] = count;
+        }
+
+        require(
+            numberOfPartnerTokens[msg.sender] >= _count,
+            "Incorrect partner NFT balance"
+        );
 
         for (uint256 i = 0; i < _count; i++) {
             _mintAnElement(msg.sender);
         }
+
+        checkNumberOfPartnerTokens[msg.sender] = true;
+        numberOfPartnerTokens[msg.sender] -= _count;
         mintPerWallet[msg.sender] += _count;
     }
 
-    function freeMint(uint256 _count) public payable whenNotPaused() {
+    function freeMint(uint256 _count) public payable whenNotPaused {
         uint256 total = _totalSupply();
-        require(total <= MAX_ELEMENTS, "Sale end");
-        require(total + _count <= MAX_ELEMENTS, "Max limit");
-        require(mintPerWallet[msg.sender] + _count <= MAX_PER_WALLET, "Exceeds number");
-        // основные проверки! otherNFTContract.balanceOf(user) > 0
-        // ограничение на кол-во 1нфт = 1 наша нфт, 1 пасс = 1 наша нфт
+        require(total <= MAX_TOKENS, "Sale ended");
+        require(total + _count <= MAX_TOKENS, "Max limit");
+        require(
+            mintPerWallet[msg.sender] + _count <= MAX_PER_WALLET,
+            "Exceeds max per wallet number"
+        );
+
+        require(
+            numberOfPassTokens[msg.sender] > 0 ||
+                passContract.balanceOf(msg.sender) > 0,
+            "Only for pass holders"
+        );
+
+        if (!checkNumberOfPassTokens[msg.sender]) {
+            numberOfPassTokens[msg.sender] = passContract.balanceOf(msg.sender);
+        }
+
+        require(
+            numberOfPassTokens[msg.sender] >= _count,
+            "Incorrect pass balance"
+        );
 
         for (uint256 i = 0; i < _count; i++) {
             _mintAnElement(msg.sender);
         }
-        mintPerWallet[msg.sender] += _count;
-    }
 
-
-    function mintWithMerch(uint256 _count) public payable whenNotPaused() {
-        uint256 total = _totalSupply();
-        require(total <= MAX_ELEMENTS, "Sale ended");
-        require(total + _count <= MAX_ELEMENTS, "Max limit");
-        require(mintPerWallet[msg.sender] + _count <= MAX_PER_WALLET, "Exceeds number");
-        require(msg.value >= (PRICE_WITH_MERCH * _count), "Value below price");
-
-        for (uint256 i = 0; i < _count; i++) {
-            _mintAnElement(msg.sender);
-        }
+        checkNumberOfPassTokens[msg.sender] = true;
+        numberOfPassTokens[msg.sender] -= _count;
         mintPerWallet[msg.sender] += _count;
     }
 
@@ -117,11 +182,10 @@ mapping(address => uint256) public mintPerWallet;
         _safeMint(_to, tokenId);
     }
 
-    // хорошая задумка withdraw!
     function withdrawAll() public payable onlyOwner {
         uint256 balance = address(this).balance;
-        require(balance > 0);
-        _widthdraw(devAddress, (balance * 35) / 100);
+        require(balance > 0, "Zero balance");
+        _widthdraw(developerAddress, (balance * 35) / 100);
         _widthdraw(creatorAddress, address(this).balance);
     }
 
@@ -130,7 +194,6 @@ mapping(address => uint256) public mintPerWallet;
         require(success, "Transfer failed.");
     }
 
-    // из oz
     function pause() public onlyOwner {
         _pause();
     }
@@ -146,5 +209,11 @@ mapping(address => uint256) public mintPerWallet;
         uint256 batchSize
     ) internal override whenNotPaused {
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
+    }
+
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view override(ERC721, ERC2981) returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 }

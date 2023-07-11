@@ -5,28 +5,39 @@ import { CofMon } from "../typechain-types";
 
 describe("CoffeeMonsters tests", () => {
   let signers: SignerWithAddress[];
-  let deployer: SignerWithAddress;
+  let developer: SignerWithAddress;
+  let creator: SignerWithAddress;
   let user1: SignerWithAddress;
   let user2: SignerWithAddress;
   let user3: SignerWithAddress;
   let user4: SignerWithAddress;
+  let user5: SignerWithAddress;
   let firstContract: CofMon;
   let secondContract: CofMon;
   const publicPrice = ethers.utils.parseEther("0.00666");
-  const priceForBros = ethers.utils.parseEther("0.00333");
+  const priceForPartners = ethers.utils.parseEther("0.00333");
   before(async () => {
     signers = await ethers.getSigners();
-    deployer = signers[0];
-    user1 = signers[1];
-    user2 = signers[2];
-    user3 = signers[3];
-    user4 = signers[4];
+    developer = signers[0];
+    creator = signers[1];
+    user1 = signers[2];
+    user2 = signers[3];
+    user3 = signers[4];
+    user4 = signers[5];
+    user5 = signers[6];
   });
   it("Deploys first NFT contract", async () => {
     const Factory = await ethers.getContractFactory("CofMon");
     const coffeeMonsters = await Factory.deploy(
       "https://gateway.pinata.cloud/ipfs/QmSpL6rVyrjZuFYKRiocL73d93eFa8DDaduuwmPKRoybRW/",
-      "0x9D9AE1ad49bE9b085Fef04B9c835D484a6D099e3"
+      ethers.constants.AddressZero,
+      ethers.constants.AddressZero,
+      ethers.constants.AddressZero,
+      ethers.constants.AddressZero,
+      developer.address,
+      1000,
+      creator.address,
+      developer.address
     );
     expect(coffeeMonsters.address).to.not.eq(ethers.constants.AddressZero);
     firstContract = coffeeMonsters as CofMon;
@@ -35,190 +46,136 @@ describe("CoffeeMonsters tests", () => {
   });
 
   it("Mint some nfts from first contract", async () => {
-    const mintTx = await firstContract.publicMint(user1.address, 1, {
-      value: publicPrice,
+    const mintTx = await firstContract.connect(user1).publicMint(2, 1, {
+      value: publicPrice.mul(2),
     });
     await mintTx.wait();
-
-    const mintTx2 = await firstContract.publicMint(user2.address, 1, {
-      value: publicPrice,
+    const mintTx2 = await firstContract.connect(user2).publicMint(2, 1, {
+      value: publicPrice.mul(2),
     });
     await mintTx2.wait();
+
+    const totalMined = await firstContract.totalMint();
+    expect(totalMined).to.eq(4);
   });
 
   it("Deploys second NFT contract", async () => {
     const Factory = await ethers.getContractFactory("CofMon");
-    const outAddress = firstContract.address;
+    const firstContractAddres = firstContract.address;
     const coffeeMonsters = await Factory.deploy(
-      "https://gateway.pinata.cloud/ipfs/QmSpL6rVyrjZuFYKRiocL73d93eFa8DDaduuwmPKRoybRW/",
-      outAddress
+      "https://gateway.pinata.cloud/ipfs/1",
+      firstContractAddres,
+      firstContractAddres,
+      firstContractAddres,
+      firstContractAddres,
+      developer.address,
+      1000,
+      creator.address,
+      developer.address
     );
     expect(coffeeMonsters.address).to.not.eq(ethers.constants.AddressZero);
     secondContract = coffeeMonsters as CofMon;
+
+    await expect(
+      secondContract.connect(user3).publicMint(1, 1)
+    ).to.be.revertedWith("Pausable: paused");
+
+    await expect(
+      secondContract.connect(user3).mintForPartners(1)
+    ).to.be.revertedWith("Pausable: paused");
+
+    await expect(secondContract.connect(user3).freeMint(1)).to.be.revertedWith(
+      "Pausable: paused"
+    );
 
     await secondContract.unpause();
   });
 
   it("Mint some nfts from second contract", async () => {
-    const mintTx = await secondContract.publicMint(user3.address, 1, {
+    const mintTx = await secondContract.connect(user3).publicMint(1, 1, {
       value: publicPrice,
     });
     await mintTx.wait();
-    // expect(await token.tokenURI(0)).to.eq(`ipfs://${tokenId}`);
-
-    const mintTx2 = await secondContract.mintForBros(user1.address, 1, {
-      value: priceForBros,
+    const mintTx2 = await secondContract.connect(user1).mintForPartners(1, {
+      value: priceForPartners,
     });
     await mintTx2.wait();
 
-    await expect(
-      secondContract.mintForBros(user4.address, 1, {
-        value: priceForBros,
-      })
-    ).to.be.revertedWith("only for bros holders");
-  });
-});
-
-/*
-describe("Lock", function () {
-  // We define a fixture to reuse the same setup in every test.
-  // We use loadFixture to run this setup once, snapshot that state,
-  // and reset Hardhat Network to that snapshot in every test.
-  async function deployOneYearLockFixture() {
-    onst mintTx3 = await token.safeMint(deployer, tokenId3);
+    const mintTx3 = await secondContract.connect(user1).freeMint(1);
     await mintTx3.wait();
-    expect(await token.totalSupply()).to.eq(3);
-    const deployerTokenId = await token.tokenOfOwnerByIndex(deployer, 0);
-    expect(deployerTokenId).to.eq(2);
-    expect(await token.tokenURI(deployerTokenId)).to.eq(`ipfs://${tokenId3}`);
 
-    expect(await token.ownerOf(deployerTokenId)).to.eq(deployer);
-    
-    const approveTx = await token.approve(user, deployerTokenId);
-    await approveTx.wait();
+    const totalMined = await secondContract.totalMint();
+    expect(totalMined).to.eq(3);
 
-    const transferTx = await tokenAsUser.transferFrom(deployer, user, deployerTokenId);
-    await transferTx.wait();
-
-    expect(await token.ownerOf(deployerTokenId)).to.eq(user);
-
-    const burnTx = await tokenAsUser.burn(deployerTokenId);
-    await burnTx.wait();
-    expect(await token.totalSupply()).to.eq(2);
-
-
-    const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-    const ONE_GWEI = 1_000_000_000;
-
-    const lockedAmount = ONE_GWEI;
-    const unlockTime = (await time.latest()) + ONE_YEAR_IN_SECS;
-
-    // Contracts are deployed using the first signer/account by default
-    const [owner, otherAccount] = await ethers.getSigners();
-
-    const Lock = await ethers.getContractFactory("Lock");
-    const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
-
-    return { lock, unlockTime, lockedAmount, owner, otherAccount };
-  }
-
-  describe("Deployment", function () {
-    it("Should set the right unlockTime", async function () {
-      const { lock, unlockTime } = await loadFixture(deployOneYearLockFixture);
-
-      expect(await lock.unlockTime()).to.equal(unlockTime);
-    });
-
-    it("Should set the right owner", async function () {
-      const { lock, owner } = await loadFixture(deployOneYearLockFixture);
-
-      expect(await lock.owner()).to.equal(owner.address);
-    });
-
-    it("Should receive and store the funds to lock", async function () {
-      const { lock, lockedAmount } = await loadFixture(
-        deployOneYearLockFixture
-      );
-
-      expect(await ethers.provider.getBalance(lock.address)).to.equal(
-        lockedAmount
-      );
-    });
-
-    it("Should fail if the unlockTime is not in the future", async function () {
-      // We don't use the fixture here because we want a different deployment
-      const latestTime = await time.latest();
-      const Lock = await ethers.getContractFactory("Lock");
-      await expect(Lock.deploy(latestTime, { value: 1 })).to.be.revertedWith(
-        "Unlock time should be in the future"
-      );
-    });
+    await secondContract.withdrawAll();
   });
 
-  describe("Withdrawals", function () {
-    describe("Validations", function () {
-      it("Should revert with the right error if called too soon", async function () {
-        const { lock } = await loadFixture(deployOneYearLockFixture);
+  it("Check all possible requires", async () => {
+    await expect(secondContract.withdrawAll()).to.be.revertedWith(
+      "Zero balance"
+    );
 
-        await expect(lock.withdraw()).to.be.revertedWith(
-          "You can't withdraw yet"
-        );
-      });
+    await expect(
+      secondContract.connect(user3).setBaseURI("https://gateway.pinata.cloud/ipfs/2")
+    ).to.be.revertedWith("Ownable: caller is not the owner");
 
-      it("Should revert with the right error if called from another account", async function () {
-        const { lock, unlockTime, otherAccount } = await loadFixture(
-          deployOneYearLockFixture
-        );
+    await expect(secondContract.connect(user3).pause()).to.be.revertedWith(
+      "Ownable: caller is not the owner"
+    );
 
-        // We can increase the time in Hardhat Network
-        await time.increaseTo(unlockTime);
+    await expect(secondContract.connect(user3).unpause()).to.be.revertedWith(
+      "Ownable: caller is not the owner"
+    );
 
-        // We use lock.connect() to send a transaction from another account
-        await expect(lock.connect(otherAccount).withdraw()).to.be.revertedWith(
-          "You aren't the owner"
-        );
-      });
+    await expect(
+      secondContract.connect(user3).withdrawAll()
+    ).to.be.revertedWith("Ownable: caller is not the owner");
 
-      it("Shouldn't fail if the unlockTime has arrived and the owner calls it", async function () {
-        const { lock, unlockTime } = await loadFixture(
-          deployOneYearLockFixture
-        );
+    await expect(
+      secondContract.connect(user3).mintForPartners(1, {
+        value: priceForPartners,
+      })
+    ).to.be.revertedWith("Only for partner NFT holders");
 
-        // Transactions are sent using the first signer by default
-        await time.increaseTo(unlockTime);
+    await expect(secondContract.connect(user5).freeMint(6)).to.be.revertedWith(
+      "Only for pass holders"
+    );
 
-        await expect(lock.withdraw()).not.to.be.reverted;
-      });
-    });
+    await expect(secondContract.connect(user1).freeMint(6)).to.be.revertedWith(
+      "Incorrect pass balance"
+    );
 
-    describe("Events", function () {
-      it("Should emit an event on withdrawals", async function () {
-        const { lock, unlockTime, lockedAmount } = await loadFixture(
-          deployOneYearLockFixture
-        );
+    await expect(
+      secondContract.connect(user1).mintForPartners(8, {
+        value: priceForPartners.mul(8),
+      })
+    ).to.be.revertedWith("Incorrect partner NFT balance");
 
-        await time.increaseTo(unlockTime);
+    await expect(
+      secondContract.connect(user1).publicMint(8, 2)
+    ).to.be.revertedWith("Incorrect mint index");
 
-        await expect(lock.withdraw())
-          .to.emit(lock, "Withdrawal")
-          .withArgs(lockedAmount, anyValue); // We accept any value as `when` arg
-      });
-    });
+    await expect(
+      secondContract.connect(user1).publicMint(15, 1)
+    ).to.be.revertedWith("Exceeds max per wallet number");
 
-    describe("Transfers", function () {
-      it("Should transfer the funds to the owner", async function () {
-        const { lock, unlockTime, lockedAmount, owner } = await loadFixture(
-          deployOneYearLockFixture
-        );
+    await expect(
+      secondContract.connect(user5).mintForPartners(11)
+    ).to.be.revertedWith("Exceeds max per wallet number");
+    await expect(secondContract.connect(user5).freeMint(11)).to.be.revertedWith(
+      "Exceeds max per wallet number"
+    );
 
-        await time.increaseTo(unlockTime);
+    await expect(
+      secondContract.connect(user1).publicMint(8, 0)
+    ).to.be.revertedWith("Value below price");
 
-        await expect(lock.withdraw()).to.changeEtherBalances(
-          [owner, lock],
-          [lockedAmount, -lockedAmount]
-        );
-      });
-    });
+    await expect(
+      secondContract.connect(user4).mintForPartners(10)
+    ).to.be.revertedWith("Value below price");
+
+    await expect(
+      secondContract.connect(user1).publicMint(2, 1)
+    ).to.be.revertedWith("Value below price");
   });
 });
-*/
