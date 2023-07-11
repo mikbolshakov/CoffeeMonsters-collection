@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import monsterImage from "../images/Box.svg";
 import arrow from "../images/CheckBox.svg";
 import arrow2 from "../images/checkmark.svg";
@@ -9,6 +9,28 @@ const MintComponent = () => {
   const [emailVisible, setEmailVisible] = useState(false);
   const [upgradedPrice, setUpgradedPrice] = useState(false);
   const [currentArrow, setCurrentArrow] = useState(arrow);
+  const [price, setPrice] = useState("0 ETH");
+
+  useEffect(() => {
+    setNftCount(0);
+    setEmailVisible(false);
+    // setUpgradedPrice(false);
+    setCurrentArrow(arrow);
+  }, [selectedOption]);
+
+  useEffect(() => {
+    let price;
+    if (selectedOption === "free") {
+      price = "Free";
+    } else if (selectedOption === "half") {
+      price = (0.00333 * nftCount).toFixed(5) + " ETH";
+    } else {
+      price = upgradedPrice
+        ? (0.0666 * nftCount).toFixed(5) + " ETH"
+        : (0.00666 * nftCount).toFixed(5) + " ETH";
+    }
+    setPrice(price);
+  }, [selectedOption, upgradedPrice, nftCount]);
 
   const handleMerchImageChange = () => {
     if (currentArrow === arrow) {
@@ -93,15 +115,7 @@ const MintComponent = () => {
           <div className="detail-column">
             <div className="detail-row">
               <div className="detail-label">Price</div>
-              <div className="detail-value">
-                {selectedOption === "free"
-                  ? "Free"
-                  : selectedOption === "half"
-                  ? "0.00333 ETH"
-                  : upgradedPrice
-                  ? "0.0666 ETH"
-                  : "0.00666 ETH"}
-              </div>
+              <div className="detail-value">{price}</div>
             </div>
           </div>
 
@@ -167,3 +181,46 @@ const MintComponent = () => {
 };
 
 export default MintComponent;
+
+// const addEmployee = async (e) => {
+//     e.preventDefault();
+//     if (validateForm()) {
+//       let receipt;
+
+//       try {
+//         const tx = await contract.addEmployee(
+//           newEmployee.walletAddress,
+//           BigNumber.from(newEmployee.salary).mul(
+//             BigNumber.from("1000000000000000000")
+//           )
+//         );
+//         receipt = await tx.wait();
+//       } catch (error) {
+//         alert("Ограничение в смарт контракте");
+//         console.error(
+//           "Не удалось добавить сотрудника в смарт контракт: ",
+//           error
+//         );
+//       }
+
+//       if (receipt.status === 1) {
+//         try {
+//           await axios.post("http://localhost:3500/employees", {
+//             fullName: newEmployee.fullName,
+//             walletAddress: newEmployee.walletAddress,
+//             salary: newEmployee.salary,
+//           });
+//           fetchEmployees();
+//           handleModalClose();
+//         } catch (error) {
+//           alert("Ограничение в базе данных");
+//           console.error(
+//             "Не удалось добавить сотрудника в базу данных: ",
+//             error
+//           );
+//         }
+//       } else {
+//         console.log("Ошибка при выполнении транзакции на смарт-контракте");
+//       }
+//     }
+//   };

@@ -22,7 +22,7 @@ function SocialPage() {
 
   const redirectToAttic = () => {
     window.open(
-      "https://atticc.xyz/users/0x94C99D650415CF4119Dd6398DBC160a4B3952c78/posts",
+      "https://atticc.xyz/c/0x232c4428F5291297c653BC6906C5225fD5C5D075",
       "_blank",
       "noopener noreferrer"
     );

@@ -285,10 +285,15 @@ body {
   font-family: Schoolbell;
   font-size: 14px;
 }
-
+.merch-buttons input:focus {
+    outline: none; /* Удаляет рамку вокруг поля ввода при фокусе */
+    border-color: transparent; /* Удаляет цвет границы при фокусе */
+  }
+  
 .merch-description {
   font-size: 16px;
   color: #fff;
+  text-align: left;
 }
 
 .info-button {
