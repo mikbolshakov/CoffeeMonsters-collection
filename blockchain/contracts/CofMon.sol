@@ -56,59 +56,59 @@ mapping(address => uint256) public mintPerWallet;
 для этих 50% скидка на минт, бесплатно для держателей наших пассов и паблик. 
 еще четвёртый, паблик+мерч, он будет в 10 раз дороже паблика.
 */
-    function publicMint(address _to, uint256 _count) public payable whenNotPaused() {
+    function publicMint(uint256 _count) public payable whenNotPaused() {
         uint256 total = _totalSupply();
         require(total <= MAX_ELEMENTS, "Sale end");
         require(total + _count <= MAX_ELEMENTS, "Max limit");
-        require(mintPerWallet[_to] + _count <= MAX_PER_WALLET, "Exceeds number");
+        require(mintPerWallet[msg.sender] + _count <= MAX_PER_WALLET, "Exceeds number");
         require(msg.value >= (PRICE_PUBLIC * _count), "Value below price");
 
         for (uint256 i = 0; i < _count; i++) {
-            _mintAnElement(_to);
+            _mintAnElement(msg.sender);
         }
-        mintPerWallet[_to] += _count;
+        mintPerWallet[msg.sender] += _count;
     }
 
-    function mintForBros(address _to, uint256 _count) public payable whenNotPaused() {
+    function mintForBros(uint256 _count) public payable whenNotPaused() {
         uint256 total = _totalSupply();
         require(total <= MAX_ELEMENTS, "Sale end");
         require(total + _count <= MAX_ELEMENTS, "Max limit");
-        require(mintPerWallet[_to] + _count <= MAX_PER_WALLET, "Exceeds number");
+        require(mintPerWallet[msg.sender] + _count <= MAX_PER_WALLET, "Exceeds number");
         require(msg.value >= (PRICE_FOR_BROS * _count), "Value below price");
-        require(otherNFTContract.balanceOf(_to) >= _count, "only for bros holders");
+        require(otherNFTContract.balanceOf(msg.sender) >= _count, "only for bros holders");
 
         for (uint256 i = 0; i < _count; i++) {
-            _mintAnElement(_to);
+            _mintAnElement(msg.sender);
         }
-        mintPerWallet[_to] += _count;
+        mintPerWallet[msg.sender] += _count;
     }
 
-    function freeMint(address _to, uint256 _count) public payable whenNotPaused() {
+    function freeMint(uint256 _count) public payable whenNotPaused() {
         uint256 total = _totalSupply();
         require(total <= MAX_ELEMENTS, "Sale end");
         require(total + _count <= MAX_ELEMENTS, "Max limit");
-        require(mintPerWallet[_to] + _count <= MAX_PER_WALLET, "Exceeds number");
+        require(mintPerWallet[msg.sender] + _count <= MAX_PER_WALLET, "Exceeds number");
         // основные проверки! otherNFTContract.balanceOf(user) > 0
         // ограничение на кол-во 1нфт = 1 наша нфт, 1 пасс = 1 наша нфт
 
         for (uint256 i = 0; i < _count; i++) {
-            _mintAnElement(_to);
+            _mintAnElement(msg.sender);
         }
-        mintPerWallet[_to] += _count;
+        mintPerWallet[msg.sender] += _count;
     }
 
 
-    function mintWithMerch(address _to, uint256 _count) public payable whenNotPaused() {
+    function mintWithMerch(uint256 _count) public payable whenNotPaused() {
         uint256 total = _totalSupply();
         require(total <= MAX_ELEMENTS, "Sale ended");
         require(total + _count <= MAX_ELEMENTS, "Max limit");
-        require(mintPerWallet[_to] + _count <= MAX_PER_WALLET, "Exceeds number");
+        require(mintPerWallet[msg.sender] + _count <= MAX_PER_WALLET, "Exceeds number");
         require(msg.value >= (PRICE_WITH_MERCH * _count), "Value below price");
 
         for (uint256 i = 0; i < _count; i++) {
-            _mintAnElement(_to);
+            _mintAnElement(msg.sender);
         }
-        mintPerWallet[_to] += _count;
+        mintPerWallet[msg.sender] += _count;
     }
 
     function _mintAnElement(address _to) private {

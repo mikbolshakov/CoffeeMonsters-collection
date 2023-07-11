@@ -14,7 +14,7 @@ const MintComponent = () => {
   useEffect(() => {
     setNftCount(0);
     setEmailVisible(false);
-    // setUpgradedPrice(false);
+    setUpgradedPrice(false);
     setCurrentArrow(arrow);
   }, [selectedOption]);
 
@@ -60,7 +60,65 @@ const MintComponent = () => {
     }
   };
 
-  const handleMint = () => {
+  const handleMint = async (e) => {
+    e.preventDefault();
+    // if (validateForm()) {
+    //   let receipt;
+
+    //   if (selectedOption === "public") {
+    //     if (emailVisible) {
+    //       try {
+    //         const tx = await contract.publicMintWithMerch(nftCount);
+    //         receipt = await tx.wait();
+    //       } catch (error) {
+    //         alert("Limitation in a smart contract");
+    //         console.error(error);
+    //       }
+    //     } else {
+    //       try {
+    //         const tx = await contract.publicMint(nftCount);
+    //         receipt = await tx.wait();
+    //       } catch (error) {
+    //         alert("Limitation in a smart contract");
+    //         console.error(error);
+    //       }
+    //     }
+    //   } else if (selectedOption === "half") {
+    //     try {
+    //       const tx = await contract.mintForBros(nftCount);
+    //       receipt = await tx.wait();
+    //     } catch (error) {
+    //       alert("Limitation in a smart contract");
+    //       console.error(error);
+    //     }
+    //   } else if (selectedOption === "free") {
+    //     try {
+    //       const tx = await contract.freeMint(nftCount);
+    //       receipt = await tx.wait();
+    //     } catch (error) {
+    //       alert("Limitation in a smart contract");
+    //       console.error(error);
+    //     }
+    //   }
+
+    //   if (receipt.status === 1) {
+    //     try {
+    //       await axios.post("http://localhost:3500/collectors", {
+    //         email: newCollector.email,
+    //       });
+    //       setNftCount(0);
+    //       setEmailVisible(false);
+    //       setUpgradedPrice(false);
+    //       setCurrentArrow(arrow);
+    //     } catch (error) {
+    //       alert("Database limitation");
+    //       console.error(error);
+    //     }
+    //   } else {
+    //     console.log("Error when executing a transaction on a smart contract");
+    //   }
+    // }
+
     setNftCount(0);
     setEmailVisible(false);
     setUpgradedPrice(false);
@@ -181,46 +239,3 @@ const MintComponent = () => {
 };
 
 export default MintComponent;
-
-// const addEmployee = async (e) => {
-//     e.preventDefault();
-//     if (validateForm()) {
-//       let receipt;
-
-//       try {
-//         const tx = await contract.addEmployee(
-//           newEmployee.walletAddress,
-//           BigNumber.from(newEmployee.salary).mul(
-//             BigNumber.from("1000000000000000000")
-//           )
-//         );
-//         receipt = await tx.wait();
-//       } catch (error) {
-//         alert("Ограничение в смарт контракте");
-//         console.error(
-//           "Не удалось добавить сотрудника в смарт контракт: ",
-//           error
-//         );
-//       }
-
-//       if (receipt.status === 1) {
-//         try {
-//           await axios.post("http://localhost:3500/employees", {
-//             fullName: newEmployee.fullName,
-//             walletAddress: newEmployee.walletAddress,
-//             salary: newEmployee.salary,
-//           });
-//           fetchEmployees();
-//           handleModalClose();
-//         } catch (error) {
-//           alert("Ограничение в базе данных");
-//           console.error(
-//             "Не удалось добавить сотрудника в базу данных: ",
-//             error
-//           );
-//         }
-//       } else {
-//         console.log("Ошибка при выполнении транзакции на смарт-контракте");
-//       }
-//     }
-//   };

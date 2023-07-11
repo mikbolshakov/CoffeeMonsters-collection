@@ -264,9 +264,9 @@ body {
   display: flex;
 }
 .merch-container {
-    display: flex;
-    align-items: center;
-  }
+  display: flex;
+  align-items: center;
+}
 
 .merch-buttons img {
   cursor: pointer;
@@ -285,11 +285,20 @@ body {
   font-family: Schoolbell;
   font-size: 14px;
 }
+
 .merch-buttons input:focus {
-    outline: none; /* Удаляет рамку вокруг поля ввода при фокусе */
-    border-color: transparent; /* Удаляет цвет границы при фокусе */
-  }
-  
+  outline: none;
+  border-bottom: 3px solid #fff;
+}
+
+.merch-buttons input::placeholder {
+  color: #fff;
+}
+
+.merch-buttons input:valid {
+  border-bottom: 3px solid #fff;
+}
+
 .merch-description {
   font-size: 16px;
   color: #fff;
@@ -303,7 +312,7 @@ body {
   width: 15px;
   height: 15px;
   background-color: white;
-  color: rgba(105, 171, 167, 1);;
+  color: rgba(105, 171, 167, 1);
   border: 1px solid white;
   border-radius: 50%;
   text-align: center;
@@ -339,50 +348,50 @@ body {
 }
 
 .info-text1 {
-    visibility: hidden;
-    width: 260px;
-    color: rgba(105, 171, 167, 1);
-    text-align: center;
-    padding: 15px;
-    border-radius: 20px;
-    font-size: 16px;
-    background-color: white;
-    position: absolute;
-    z-index: 1;
-    top: -80px;
-    left: 105%;
-  
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  
-  .info-button:hover .info-text1 {
-    visibility: visible;
-    opacity: 1;
-  }
+  visibility: hidden;
+  width: 260px;
+  color: rgba(105, 171, 167, 1);
+  text-align: center;
+  padding: 15px;
+  border-radius: 20px;
+  font-size: 16px;
+  background-color: white;
+  position: absolute;
+  z-index: 1;
+  top: -80px;
+  left: 105%;
 
-  .info-text2 {
-    visibility: hidden;
-    width: 260px;
-    color: rgba(105, 171, 167, 1);
-    text-align: center;
-    padding: 15px;
-    border-radius: 20px;
-    font-size: 16px;
-    background-color: white;
-    position: absolute;
-    z-index: 1;
-    top: -110px;
-    left: 105%;
-  
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  
-  .info-button:hover .info-text2 {
-    visibility: visible;
-    opacity: 1;
-  }
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.info-button:hover .info-text1 {
+  visibility: visible;
+  opacity: 1;
+}
+
+.info-text2 {
+  visibility: hidden;
+  width: 260px;
+  color: rgba(105, 171, 167, 1);
+  text-align: center;
+  padding: 15px;
+  border-radius: 20px;
+  font-size: 16px;
+  background-color: white;
+  position: absolute;
+  z-index: 1;
+  top: -110px;
+  left: 105%;
+
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.info-button:hover .info-text2 {
+  visibility: visible;
+  opacity: 1;
+}
 
 /* social */
 .social {
