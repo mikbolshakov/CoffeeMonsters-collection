@@ -6,9 +6,11 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
     using Counters for Counters.Counter;
+    using Strings for uint256;
     Counters.Counter private _tokenIdCounter;
 
     IERC721 public immutable firstPartnerNFTContract;
@@ -24,6 +26,7 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
     uint256 public constant PRICE_WITH_MERCH = 0.0666 ether;
     uint256 public constant MAX_PER_WALLET = 10;
     string public baseTokenURI;
+    string private baseExtension = ".json";
 
     mapping(address => uint256) public mintPerWallet;
     mapping(address => bool) public checkNumberOfPartnerTokens;
@@ -200,6 +203,21 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
 
     function unpause() public onlyOwner {
         _unpause();
+    }
+
+    function tokenURI(
+        uint256 tokenId
+    ) public view virtual override returns (string memory) {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
+        string memory baseURI = _baseURI();
+
+        return
+            bytes(baseURI).length > 0
+                ? string(abi.encodePacked(baseURI, tokenId.toString(), baseExtension))
+                : "";
     }
 
     function _beforeTokenTransfer(
