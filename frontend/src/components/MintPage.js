@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import monsterImage from "../images/Box.svg";
 import arrow from "../images/CheckBox.svg";
 import arrow2 from "../images/checkmark.svg";
-import { ethers } from "ethers";
-import contractAbi from "../ABI/contractAbi.json";
-import axios from "axios";
+// import { ethers } from "ethers";
+// import contractAbi from "../ABI/contractAbi.json";
+// import axios from "axios";
 
-const contractAddress = "0x105B63C411598Df46F86D87af283054AA1eBBb9F";
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-const signer = provider.getSigner();
-const contract = new ethers.Contract(contractAddress, contractAbi, signer);
+// const contractAddress = "0x105B63C411598Df46F86D87af283054AA1eBBb9F";
+// const provider = new ethers.providers.Web3Provider(window.ethereum);
+// const signer = provider.getSigner();
+// const contract = new ethers.Contract(contractAddress, contractAbi, signer);
 
 const MintComponent = () => {
   const [selectedOption, setSelectedOption] = useState("public");
@@ -70,63 +70,62 @@ const MintComponent = () => {
 
   const handleMint = async (e) => {
     e.preventDefault();
-    // if (validateForm()) {
-      let receipt;
+    // // if (validateForm()) {
+    //   let receipt;
 
-      if (selectedOption === "public") {
-        if (emailVisible) {
-          try {
-            const tx = await contract.publicMint(nftCount, 0);
-            receipt = await tx.wait();
-          } catch (error) {
-            alert("Limitation in a smart contract");
-            console.error(error);
-          }
-        } else {
-          try {
-            const tx = await contract.publicMint(nftCount, 1);
-            receipt = await tx.wait();
-          } catch (error) {
-            alert("Limitation in a smart contract");
-            console.error(error);
-          }
-        }
-      } else if (selectedOption === "half") {
-        try {
-          const tx = await contract.mintForPartners(nftCount);
-          receipt = await tx.wait();
-        } catch (error) {
-          alert("Limitation in a smart contract");
-          console.error(error);
-        }
-      } else if (selectedOption === "free") {
-        try {
-          const tx = await contract.freeMint(nftCount);
-          receipt = await tx.wait();
-        } catch (error) {
-          alert("Limitation in a smart contract");
-          console.error(error);
-        }
-      }
-
-      if (receipt.status === 1) {
-        try {
-          await axios.post("http://localhost:3500/collectors", {
-            email: newCollector.email,
-          });
-          setNftCount(0);
-          setEmailVisible(false);
-          setUpgradedPrice(false);
-          setCurrentArrow(arrow);
-        } catch (error) {
-          alert("Database limitation");
-          console.error(error);
-        }
-    //   } else {
-    //     console.log("Error when executing a transaction on a smart contract");
+    //   if (selectedOption === "public") {
+    //     if (emailVisible) {
+    //       try {
+    //         const tx = await contract.publicMint(nftCount, 0);
+    //         receipt = await tx.wait();
+    //       } catch (error) {
+    //         alert("Limitation in a smart contract");
+    //         console.error(error);
+    //       }
+    //     } else {
+    //       try {
+    //         const tx = await contract.publicMint(nftCount, 1);
+    //         receipt = await tx.wait();
+    //       } catch (error) {
+    //         alert("Limitation in a smart contract");
+    //         console.error(error);
+    //       }
+    //     }
+    //   } else if (selectedOption === "half") {
+    //     try {
+    //       const tx = await contract.mintForPartners(nftCount);
+    //       receipt = await tx.wait();
+    //     } catch (error) {
+    //       alert("Limitation in a smart contract");
+    //       console.error(error);
+    //     }
+    //   } else if (selectedOption === "free") {
+    //     try {
+    //       const tx = await contract.freeMint(nftCount);
+    //       receipt = await tx.wait();
+    //     } catch (error) {
+    //       alert("Limitation in a smart contract");
+    //       console.error(error);
+    //     }
     //   }
-    }
 
+    //   if (receipt.status === 1) {
+    //     try {
+    //       await axios.post("http://localhost:3500/collectors", {
+    //         email: newCollector.email,
+    //       });
+    //       setNftCount(0);
+    //       setEmailVisible(false);
+    //       setUpgradedPrice(false);
+    //       setCurrentArrow(arrow);
+    //     } catch (error) {
+    //       alert("Database limitation");
+    //       console.error(error);
+    //     }
+    // //   } else {
+    // //     console.log("Error when executing a transaction on a smart contract");
+    // //   }
+    
     setNftCount(0);
     setEmailVisible(false);
     setUpgradedPrice(false);

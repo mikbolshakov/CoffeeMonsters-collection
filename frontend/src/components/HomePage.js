@@ -2,7 +2,7 @@ import React from "react";
 import main from "../images/Main.svg";
 import logo from "../images/Logo.svg";
 import mint from "../images/ButtonMint.svg";
-import ConnectButton from "./walletConnection/ConnectButton";
+import ConnectButton from "./WalletConnection";
 
 function HomePage() {
   const handleNavClick = (anchor) => {

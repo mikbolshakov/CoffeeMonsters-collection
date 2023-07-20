@@ -5,8 +5,7 @@ import "hardhat-deploy-ethers";
 
 // npx hardhat run scripts/deploy.ts --network chain
 async function main() {
-  const baseURI =
-    "https://gateway.pinata.cloud/ipfs/QmSpL6rVyrjZuFYKRiocL73d93eFa8DDaduuwmPKRoybRW/";
+  const baseURI = "https://gateway.pinata.cloud/ipfs/"; // "https://gateway.pinata.cloud/ipfs/QmSpL6rVyrjZuFYKRiocL73d93eFa8DDaduuwmPKRoybRW/";
   const firstPartnerNFTContract = "0x9dB184d1058F7CFd26C0436fDf291B321057508e";
   const secondPartnerNFTContract = "0x3B4e3270eA25bdf0826AF34cE456854b88DE9b62";
   const thirdPartnerNFTContract = "0x3B4e3270eA25bdf0826AF34cE456854b88DE9b62";
@@ -47,6 +46,7 @@ async function main() {
       creator,
       developer,
     ],
+    contract: "contracts/CofMon.sol:CofMon",
   });
 }
 

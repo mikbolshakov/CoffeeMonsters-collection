@@ -1,10 +1,21 @@
 import { useWeb3React } from "@web3-react/core";
 import { ethers } from "ethers";
-import { injected } from "./Connectors";
-import { connectWallet, disconnectWallet } from "./StorageWallet.js";
+import { InjectedConnector } from "@web3-react/injected-connector";
 
 const ConnectButton = () => {
   const { activate, account, deactivate } = useWeb3React();
+
+  const injected = new InjectedConnector({
+    supportedChainIds: process.env.REACT_APP_CHAIN_ID,
+  });
+
+  const connectWallet = () => {
+    localStorage.setItem("wallet", "metamask");
+  };
+
+  const disconnectWallet = () => {
+    localStorage.removeItem("wallet");
+  };
 
   const connectMetamaskHandler = async () => {
     try {

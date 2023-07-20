@@ -21,9 +21,9 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
     address public immutable developerAddress;
 
     uint256 public constant MAX_TOKENS = 666;
-    uint256 public constant PRICE_PUBLIC = 0.00666 ether;
-    uint256 public constant PRICE_FOR_PARTNERS = 0.00333 ether;
-    uint256 public constant PRICE_WITH_MERCH = 0.0666 ether;
+    uint256 public constant PRICE_PUBLIC = 1e16; // 0.00666 ether;
+    uint256 public constant PRICE_FOR_PARTNERS = 1e15; // 0.00333 ether;
+    uint256 public constant PRICE_WITH_MERCH = 1e17; // 0.0666 ether;
     uint256 public constant MAX_PER_WALLET = 10;
     string public baseTokenURI;
     string private baseExtension = ".json";
@@ -61,7 +61,7 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
         _setDefaultRoyalty(_receiver, _feeNumerator);
         creatorAddress = _creator;
         developerAddress = _developer;
-        pause();
+        // pause();
     }
 
     function _totalSupply() internal view returns (uint) {
@@ -78,10 +78,9 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
 
     function publicMint(
         uint256 _count,
-        uint _mintIndex
+        bool _withMerch
     ) public payable whenNotPaused {
         uint256 total = _totalSupply();
-        require(_mintIndex <= 1, "Incorrect mint index");
         require(total <= MAX_TOKENS, "Sale ended");
         require(total + _count <= MAX_TOKENS, "Max limit");
         require(
@@ -89,12 +88,12 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
             "Exceeds max per wallet number"
         );
 
-        if (_mintIndex == 0) {
+        if (_withMerch) {
             require(
                 msg.value >= (PRICE_WITH_MERCH * _count),
                 "Value below price"
             );
-        } else if (_mintIndex == 1) {
+        } else {
             require(msg.value >= (PRICE_PUBLIC * _count), "Value below price");
         }
 
@@ -185,7 +184,7 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
         _safeMint(_to, tokenId);
     }
 
-    function withdrawAll() public payable onlyOwner {
+    function withdrawAll() public onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0, "Zero balance");
         _widthdraw(developerAddress, (balance * 35) / 100);

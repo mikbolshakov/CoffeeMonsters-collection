@@ -8,7 +8,7 @@ const config: HardhatUserConfig = {
   solidity: "0.8.17",
   networks: {
     chain: {
-      url: `${process.env.MUMBAI}`,
+      url: `${process.env.CHAIN}`,
       accounts: [<string>process.env.ADMIN_PRIVATE_KEY],
     },
   },
