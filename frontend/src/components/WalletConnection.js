@@ -1,75 +1,102 @@
-import { useWeb3React } from "@web3-react/core";
-import { ethers } from "ethers";
-import { InjectedConnector } from "@web3-react/injected-connector";
+import React from "react";
 
 const ConnectButton = () => {
-  const { activate, account, deactivate } = useWeb3React();
-
-  const injected = new InjectedConnector({
-    supportedChainIds: process.env.REACT_APP_CHAIN_ID,
-  });
-
-  const connectWallet = () => {
-    localStorage.setItem("wallet", "metamask");
-  };
-
-  const disconnectWallet = () => {
-    localStorage.removeItem("wallet");
-  };
-
-  const connectMetamaskHandler = async () => {
-    try {
-      if (window.ethereum) {
-        const chainId = await window.ethereum.request({
-          method: "eth_chainId",
-        });
-        const chainNumber = ethers.BigNumber.from(chainId).toString();
-
-        if (
-          process.env.REACT_APP_CHAIN_ID &&
-          chainNumber !== process.env.REACT_APP_CHAIN_ID.toString()
-        ) {
-          try {
-            await window.ethereum.request({
-              method: "wallet_switchEthereumChain",
-              params: [
-                {
-                  chainId: ethers.utils.hexValue(
-                    parseInt(process.env.REACT_APP_CHAIN_ID)
-                  ),
-                },
-              ],
-            });
-          } catch (e) {
-            console.log(e.message);
-            return;
-          }
-        }
-        await activate(injected);
-        connectWallet();
-      } else {
-        alert("Wallet extension not found");
-      }
-    } catch (e) {
-      console.log(e.message);
-      alert("Wallet connection error");
-    }
-  };
+  const [metaMaskConnected, setMetaMaskConnected] = React.useState(false);
+  const [walletAddress, setWalletAddress] = React.useState("");
 
   const shortAddress = (address) => {
-    return address.substr(0, 6) + "..." + address.substr(-5);
+    return address ? address.substr(0, 6) + "..." + address.substr(-5) : "";
   };
 
   const disconnectWalletHandler = () => {
-    deactivate();
-    disconnectWallet();
+    if (window.ethereum) {
+      try {
+        if (typeof window.ethereum.disconnect === "function") {
+          window.ethereum.disconnect();
+        }
+
+        setMetaMaskConnected(false);
+        setWalletAddress("");
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
+  // Network Name: zkSync Era Mainnet
+  // RPC URL: https://mainnet.era.zksync.io
+  // Chain ID: 324
+  // Currency Symbol: ETH
+  // Block Explorer URL: https://explorer.zksync.io/
+
+  const connectMetamaskHandler = async () => {
+    if (window.ethereum) {
+      try {
+        const accounts = await window.ethereum
+          .request({ method: "eth_requestAccounts" })
+          .then((res) => {
+            console.log(res);
+            return res;
+          });
+
+        if (accounts.length > 0) {
+          setWalletAddress(accounts[0]);
+        }
+
+        const currentChainId = await window.ethereum.request({
+          method: "eth_chainId",
+        });
+
+        if (currentChainId !== "0x13881") {
+          try {
+            await window.ethereum.request({
+              method: "wallet_switchEthereumChain",
+              params: [{ chainId: "0x13881" }],
+            });
+          } catch (switchError) {
+            if (switchError.code === 4902) {
+              try {
+                await window.ethereum.request({
+                  method: "wallet_addEthereumChain",
+                  params: [
+                    {
+                      chainId: "0x13881",
+                      chainName: "Mumbai Testnet",
+                      rpcUrls: ["https://rpc-mumbai.maticvigil.com/"],
+                      nativeCurrency: {
+                        name: "MATIC",
+                        symbol: "MATIC",
+                        decimals: 18,
+                      },
+                      blockExplorerUrls: ["https://polygonscan.com/"],
+                    },
+                  ],
+                });
+              } catch (addError) {
+                console.log(addError);
+                return;
+              }
+            } else {
+              console.log(switchError);
+              return;
+            }
+          }
+        }
+
+        setMetaMaskConnected(true);
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      alert("install metamask extension!!");
+    }
   };
 
   return (
     <>
-      {account ? (
+      {metaMaskConnected ? (
         <button className="disconnect-wallet" onClick={disconnectWalletHandler}>
-          {shortAddress(account)}
+          {shortAddress(walletAddress)}
         </button>
       ) : (
         <button className="connect-wallet" onClick={connectMetamaskHandler}>

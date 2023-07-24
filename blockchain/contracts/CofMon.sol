@@ -17,8 +17,9 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
     IERC721 public immutable secondPartnerNFTContract;
     IERC721 public immutable thirdPartnerNFTContract;
     IERC721 public immutable passContract;
-    address public immutable creatorAddress;
-    address public immutable developerAddress;
+    address immutable creatorAddress;
+    address immutable developerAddress;
+    address immutable designerAddress;
 
     uint256 public constant MAX_TOKENS = 666;
     uint256 public constant PRICE_PUBLIC = 1e16; // 0.00666 ether;
@@ -35,13 +36,6 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
     mapping(address => bool) public checkNumberOfPassTokens;
     mapping(address => uint) public numberOfPassTokens;
 
-    // enum SaleState {
-    //     CLOSED,
-    //     OPEN,
-    //     PRESALE
-    // }
-    //  SaleState public saleState = SaleState.CLOSED;
-
     constructor(
         string memory _baseURI,
         address _firstPartnerNFTContract,
@@ -51,7 +45,8 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
         address _receiver,
         uint96 _feeNumerator,
         address _creator,
-        address _developer
+        address _developer,
+        address _designerAddress
     ) ERC721("CofMon", "CMT") {
         setBaseURI(_baseURI);
         firstPartnerNFTContract = IERC721(_firstPartnerNFTContract);
@@ -61,6 +56,7 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
         _setDefaultRoyalty(_receiver, _feeNumerator);
         creatorAddress = _creator;
         developerAddress = _developer;
+        designerAddress = _designerAddress;
         // pause();
     }
 
@@ -145,7 +141,7 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
         mintPerWallet[msg.sender] += _count;
     }
 
-    function freeMint(uint256 _count) public payable whenNotPaused {
+    function freeMint(uint256 _count) public whenNotPaused {
         uint256 total = _totalSupply();
         require(total <= MAX_TOKENS, "Sale ended");
         require(total + _count <= MAX_TOKENS, "Max limit");
@@ -187,7 +183,8 @@ contract CofMon is ERC721, Pausable, Ownable, ERC2981 {
     function withdrawAll() public onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0, "Zero balance");
-        _widthdraw(developerAddress, (balance * 35) / 100);
+        _widthdraw(developerAddress, (balance * 33) / 100);
+        _widthdraw(designerAddress, (balance * 33) / 100);
         _widthdraw(creatorAddress, address(this).balance);
     }
 

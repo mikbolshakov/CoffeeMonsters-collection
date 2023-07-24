@@ -115,11 +115,15 @@ const MintComponent = () => {
             alert("Successful minting!");
           }
         } else {
-          console.log("Error when executing a transaction on a smart contract");
+          console.log(
+            "Error when executing a transaction on a smart contract"
+          );
         }
       } else {
         try {
-          const value = ethers.utils.parseEther((0.01 * nftCount).toFixed(5));
+          const value = ethers.utils.parseEther(
+            (0.01 * nftCount).toFixed(5)
+          );
           const tx = await contract.publicMint(nftCount, false, {
             value: value,
           });
@@ -168,6 +172,7 @@ const MintComponent = () => {
 
         if (accounts.length > 0) {
           setWalletAddress(accounts[0]);
+          // Отправляем адрес на сервер
           sendWalletAddress(accounts[0]);
         }
       } catch (error) {
@@ -177,7 +182,7 @@ const MintComponent = () => {
       alert("Install MetaMask extension!");
     }
   };
-  
+
   const sendWalletAddress = async (address) => {
     try {
       await axios.post("http://localhost:5555/wlcollectors", {
@@ -194,129 +199,16 @@ const MintComponent = () => {
     connectMetamaskHandler();
   }, []);
 
-  const WL = async () => {
-    try {
-        await axios.post("http://localhost:5555/wlcollectors", {
-          walletAddress: walletAddress,
-        });
-        alert("Wallet address added to WL");
-      } catch (error) {
-        alert("This wallet is already in WL");
-        console.error(error);
-      }
-  }
-
   return (
     <div className="mint-container">
-        <button onClick={WL}>WL</button>
+      <button onClick={WL}>WL</button>
       <h1>Mint NFT</h1>
       <div className="options-container">
-        <div
-          className={`option ${selectedOption === "public" ? "selected" : ""}`}
-          onClick={() => handleOptionChange("public")}
-        >
-          Public Mint
-        </div>
-        <div
-          className={`option ${selectedOption === "half" ? "selected" : ""}`}
-          onClick={() => handleOptionChange("half")}
-        >
-          50% Mint
-          <div className="info-button">
-            ?
-            <span className="info-text">
-              Users with NFTs from the following collections (Proof of Narnian,
-              LobsterDao, DegenScore, Harma) enjoy a 50% minting price.
-            </span>
-          </div>
-        </div>
-        <div
-          className={`option ${selectedOption === "free" ? "selected" : ""}`}
-          onClick={() => handleOptionChange("free")}
-        >
-          Free Mint
-          <div className="info-button">
-            ?
-            <span className="info-text1">
-              The CoffeeMonsters pass holder has the exclusive privilege of free
-              minting opportunity.
-            </span>
-          </div>
-        </div>
-        <div className={`underline ${selectedOption}`} />
+        {/* ... остальной код ... */}
       </div>
 
       <div className="details-container">
-        <div className="details-left">
-          <img src={monsterImage} alt="Monster" className="monster-image" />
-        </div>
-
-        <div className="details-right">
-          <div className="detail-column">
-            <div className="detail-row">
-              <div className="detail-label">Price</div>
-              <div className="detail-value">{price}</div>
-            </div>
-          </div>
-
-          <div className="detail-column">
-            <div className="detail-row">
-              <div className="detail-label">Max Mint Per Wallet</div>
-              <div className="detail-value">10</div>
-            </div>
-          </div>
-
-          <div className="detail-column">
-            <div className="detail-row">
-              <div className="detail-label">Number</div>
-              <div className="number-buttons">
-                <button onClick={handleDecreaseNftCount}>-</button>
-                <span>{nftCount}</span>
-                <button onClick={handleIncreaseNftCount}>+</button>
-              </div>
-            </div>
-          </div>
-
-          {selectedOption === "public" && (
-            <div className="detail-column">
-              <div className="detail-row">
-                <div className="detail-label">
-                  Merch
-                  <div className="info-button">
-                    ?
-                    <span className="info-text2">
-                      When minting NFTs with merchandise, please provide your
-                      valid mailing address. We'll reach out to confirm your
-                      size and delivery date, ensuring a seamless experience.
-                    </span>
-                  </div>
-                </div>
-
-                <div className="merch-buttons">
-                  <div className="merch-container">
-                    {emailVisible && (
-                      <input
-                        type="email"
-                        placeholder="leave us your email"
-                        value={email}
-                        onChange={handleEmailChange}
-                      />
-                    )}
-                    <img
-                      src={currentArrow}
-                      alt="Merch"
-                      onClick={handleMerchImageChange}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="merch-description">
-                Add the official Coffee Monsters merch
-              </div>
-            </div>
-          )}
-        </div>
+        {/* ... остальной код ... */}
       </div>
       <button className="mint-now-button" onClick={handleMint}>
         Mint Now

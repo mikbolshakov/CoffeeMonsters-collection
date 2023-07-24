@@ -39,7 +39,7 @@ function SocialPage() {
           <img src={twitter} alt="twitter" />
           <p>Twitter</p>
         </div>
-        <div onClick={redirectToAttic} Ы>
+        <div onClick={redirectToAttic}>
           <img src={attic} alt="attic" />
           <p>Attic</p>
         </div>

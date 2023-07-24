@@ -1,8 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import Collector from "./schema.js";
-import { validationResult } from "express-validator";
-import { mintValidation } from "./validations.js";
+import WlCollector from "./wlSchema.js";
 import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config();
@@ -14,13 +13,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.post("/collectors", mintValidation, async (req, res) => {
+app.post("/collectors", async (req, res) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json(errors.array());
-    }
-
     const { email } = req.body;
     const newCollector = new Collector({ email });
     const user = await newCollector.save();
@@ -32,6 +26,20 @@ app.post("/collectors", mintValidation, async (req, res) => {
     });
   }
 });
+
+app.post("/wlcollectors", async (req, res) => {
+    try {
+      const { wallet } = req.body;
+      const newWlCollector = new WlCollector({ wallet });
+      const user = await newWlCollector.save();
+      res.json({ ...user._doc });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Error when create a white list collector",
+      });
+    }
+  });
 
 async function startApp() {
   try {
